@@ -1,0 +1,11 @@
+/* assets/css/shortcodes.css */
+.custom-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .custom-list-item {
+    color: blue;
+    font-weight: bold;
+  }
+  

@@ -2,3 +2,33 @@ baseURL: "https://gharbaoui.github.io/"
 languageCode: en-us
 title: My New Hugo Site
 theme: PaperMod
+
+params:
+  homeInfoParams:
+    Title: "HI"
+    Content: Welecome to my blog. I hope that you find the info here useful
+  socialIcons:
+    - name: linkedin
+      url: "https://linkedin.com/in/mohamed-el-gharbaoui-964022199"
+    - name: github
+      url: "https://github.com/gharbaoui/"
+  math: true
+
+  cover:
+    LinkFullImages: true
+
+  ShowBreadCrumbs: true
+
+  ShowShareButtons: true
+
+menu:
+  main:
+    - identifier: categories
+      name: Categories
+      url: /categories/
+      weight: 10
+
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 15

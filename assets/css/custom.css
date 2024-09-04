@@ -1,0 +1,16 @@
+.custom-grid {
+    background-color: BLUE;
+    display: flex;
+    flex-wrap: wrap; /* Allows the items to wrap into a new line */
+    gap: 10px; /* Adjusts the spacing between grid items */
+}
+
+.grid-item {
+    flex: 1 0 21%; /* Flex basis set to roughly 1/4th of the container width */
+    box-sizing: border-box; /* Includes padding and border in the width calculation */
+}
+
+.grid-item img {
+    width: 100%; /* Ensures images take the full width of the grid item */
+    display: block; /* Prevents bottom margin caused by inline images */
+}
