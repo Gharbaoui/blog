@@ -4,9 +4,11 @@ title: What I Understood
 theme: PaperMod
 
 params:
+  footer:
+    hideCopyright: false
   homeInfoParams:
     Title: "HI"
-    Content: Welecome to my blog. I hope that you find the info here useful
+    Content: Welcome to my blog! I hope you find the information here useful. By the way, I'm currently looking for an internship. If you have any opportunities, please feel free to reach out.
   socialIcons:
     - name: linkedin
       url: "https://linkedin.com/in/mohamed-el-gharbaoui-964022199"
