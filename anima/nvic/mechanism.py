@@ -1,12 +1,10 @@
 from typing import Final
-
-from numpy import size
 from ca_3b1b import *
 from ca_3b1b.ic import Gear
 from manimlib import *
 
 INTERRUPT_BIT:Final = 1 << 23
-NORMAL_SOURCE_CODE = '''
+NORMAL_SOURCE_CODE:Final = '''
 void main(void) {
     init();
     while(1) {
@@ -17,7 +15,7 @@ void main(void) {
 }
 '''
 
-ISR_SOURCE_CODE = '''
+ISR_SOURCE_CODE:Final = '''
 void exti9_5_isr(void) {
   if (exti_get_flag_status(EXTI8)) {
     gpio_toggle(GPIOA, GPIO6);
@@ -83,7 +81,7 @@ class Intro(InteractiveScene):
             src=NORMAL_SOURCE_CODE,
             scene=self,
             exec_animation=ExecutionAnimation(
-                loop_start=2, loop_end=6, highlight_color=YELLOW,
+                loop_start=2, loop_end=6, highlight_color=YELLOW
             ),
             box_color=BLUE,
         )
@@ -234,6 +232,7 @@ class Intro(InteractiveScene):
         pending_bit.set_color(RED)
         pending_bit_cp = copy.deepcopy(pending_bit)
         enable_bit_cp = copy.deepcopy(enable_bit)
+        self.embed()
         
         REF:Final = nvic_regs.get_corner(DL) + DOWN
         and_txt = Text("and").move_to(REF + RIGHT)
@@ -277,10 +276,11 @@ class Intro(InteractiveScene):
             ),
             run_time=.4
         )
+        cpu.add(nvic_irqn_to_cpu_indicator)
         # self.play(FadeOut(nvic_irqn_to_cpu_indicator), run_time=.2)
         nvic_ic.suspend(0)
         # self.wait(4)
-        cpu_showing_regs = Polygon(
+        cpu_showing_regs = always_redraw(lambda: Polygon(
             *[
                 cpu_ic.body.get_corner(DL),
                 cpu_ic.body.get_corner(DR),
@@ -290,7 +290,7 @@ class Intro(InteractiveScene):
             color=BLUE,
             fill_opacity=.2,
             stroke_width=.4,
-        )
+        ))
         cpu_showing_regs.z_index=-1
 
         self.play(
@@ -355,6 +355,7 @@ class Intro(InteractiveScene):
 
         self.add(vector_table ,cfe, isr_code)
         cfe.gear.resume_updating()
+
         for i in range(len(values)):
             if i == 5:
                 self.play(Transform(cfe.txt, cfe_txt_result), run_time=.2)
@@ -364,7 +365,6 @@ class Intro(InteractiveScene):
             self.play(Transform(current_regs_to_transform[i], mem.get_word_at(address_start)), run_time=.5)
             address_start -= 4
         isr_entry_cp = copy.deepcopy(vector_table.get_word_at(0x9c)[0])
-        # cpu_reg_pc.get_word().update_value(0x08000220)
         self.play(
             FadeOut(cpu_reg_pc.get_word()),
             isr_entry_cp.animate.move_to(cpu_reg_pc.get_word().get_center())
@@ -382,5 +382,73 @@ class Intro(InteractiveScene):
         self.play(Indicate(pending_bit, color=ORANGE,scale_factor=4), run_time=.3)
 
         isr_code.resume()
-        self.wait(1)
+        self.wait(.1)
+        isr_code.stop()
+        cpu_ic.suspend(2)
+        self.wait(2)
 
+        to_remove_from_scene = [
+            nvic, connection_between_nvic_and_cpu, pc_to_isr_pointer,
+            cfe, vector_table, pointer_to_vt
+        ]
+        self.play(*[FadeOut(obj) for obj in to_remove_from_scene])
+        
+        nvic_irqn_to_cpu_indicator.z_index=10
+        self.play(
+            cpu.animate.to_edge(LEFT)
+        )
+        isr_code.resume()
+        cpu_ic.resume(2)
+        cpu_reg_lr.get_word().update_value(0xfffffff9)
+        self.wait(2.5)
+        
+        cpu_reg_xpsr.get_word().update_value(0x21000027)
+        cpu_reg_r12.get_word().update_value(0x100)
+        cpu_reg_r3.get_word().update_value(0x40013000)
+        cpu_reg_r2.get_word().update_value(0x0)
+        cpu_reg_r1.get_word().update_value(0x40)
+        cpu_reg_r0.get_word().update_value(0x100)
+        isr_code.stop()
+        cpu_ic.suspend(2)
+        self.wait(.5)
+
+        current_regs_to_target = [
+            cpu_reg_xpsr, cpu_reg_pc, cpu_reg_lr, cpu_reg_r12,
+            cpu_reg_r3, cpu_reg_r2, cpu_reg_r1, cpu_reg_r0
+        ]
+
+        for value, from_reg, to in zip(reversed(values), reversed(current_regs_to_transform),
+                                   reversed(current_regs_to_target)):
+            to.get_word().update_value(value)
+            self.play(Transform(from_reg, to))
+        self.remove(isr_entry_cp)
+        cpu_ic.resume(0)
+        cpu_normal_execution_src.resume()
+        # question_how_should_we_go_back = Text('''
+        # How should we return to normal execution?
+        # ''')
+        # # update value of registers
+        # self.play(Indicate(question_how_should_we_go_back))
+        self.wait(4)
+
+        
+        self.embed()
+
+
+
+class Test(InteractiveScene):
+    def construct(self) -> None:
+        ct = CodeBlock(
+            src=NORMAL_SOURCE_CODE,
+            scene=self,
+            exec_animation=ExecutionAnimation(
+                loop_start=2, loop_end=6, highlight_color=YELLOW,exec_speed=1
+            ),
+            box_color=BLUE,
+        )
+
+        self.add(ct)
+        ct.set_updaters()
+        ct.resume()
+        self.wait(5)
+        self.embed()
