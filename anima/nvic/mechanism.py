@@ -121,19 +121,19 @@ class Intro(InteractiveScene):
         cpu_regs_left = VGroup()
         cpu_regs_right = VGroup()
         cpu_reg_xpsr = Register(
-            word_data=WordData(value=0x81000000, opacity=0.1),
+            word_data=WordData(value=0x1000000, opacity=0.1),
             label='xpsr',dir=Direction.LEFT
         )
         cpu_reg_pc = Register(
-            word_data=WordData(value=0x80000242, opacity=.1),
+            word_data=WordData(value=0x8000208, opacity=.1),
             label='pc',dir=Direction.LEFT
         )
         cpu_reg_lr = Register(
-            word_data=WordData(value=0x80000243, opacity=.1),
+            word_data=WordData(value=0x8000205, opacity=.1),
             label='lr',dir=Direction.LEFT
         )
         cpu_reg_r12 = Register(
-            word_data=WordData(value=0x1, opacity=.1),
+            word_data=WordData(value=0x20, opacity=.1),
             label='r12',dir=Direction.LEFT
         )
 
@@ -142,7 +142,7 @@ class Intro(InteractiveScene):
             label='r3',dir=Direction.LEFT
         )
         cpu_reg_r2 = Register(
-            word_data=WordData(value=0x40, opacity=.1),
+            word_data=WordData(value=0x800000, opacity=.1),
             label='r2',dir=Direction.LEFT
         )
         cpu_reg_r1 = Register(
@@ -150,7 +150,7 @@ class Intro(InteractiveScene):
             label='r1',dir=Direction.LEFT
         )
         cpu_reg_r0 = Register(
-            word_data=WordData(value=0xe000e406, opacity=.1),
+            word_data=WordData(value=0x40020000, opacity=.1),
             label='r0',dir=Direction.LEFT
         )
 
@@ -323,14 +323,14 @@ class Intro(InteractiveScene):
             cpu_reg_r3_cp, cpu_reg_r2_cp, cpu_reg_r1_cp, cpu_reg_r0_cp
         ]
         values = [
-            0x81000000,
-            0x80000242,
-            0x80000243,
-            0x1,
+            0x1000000,
+            0x8000208,
+            0x8000205,
+            0x100,
             0xe000e100,
-            0x40,
-            0x10,
-            0xe000e406,
+            0x800000,
+            0x20,
+            0x40020000,
         ]
         address_start = 0x2001ffe4
 
@@ -347,7 +347,7 @@ class Intro(InteractiveScene):
             ),
             addr_dir=Direction.LEFT
         ).scale(.4).to_edge(DR)
-        vector_table.set_value_at(0x0000009c, 0x08000260)
+        vector_table.set_value_at(0x0000009c, 0x08000220)
         pointer_to_vt = Arrow(
                 stroke_width=.7,
                 start=cfe.get_corner(DR),
@@ -364,7 +364,7 @@ class Intro(InteractiveScene):
             self.play(Transform(current_regs_to_transform[i], mem.get_word_at(address_start)), run_time=.5)
             address_start -= 4
         isr_entry_cp = copy.deepcopy(vector_table.get_word_at(0x9c)[0])
-        # cpu_reg_pc.get_word().update_value(0x08000260)
+        # cpu_reg_pc.get_word().update_value(0x08000220)
         self.play(
             FadeOut(cpu_reg_pc.get_word()),
             isr_entry_cp.animate.move_to(cpu_reg_pc.get_word().get_center())
@@ -377,6 +377,10 @@ class Intro(InteractiveScene):
         cpu_ic.resume(2)
         cpu_ic.suspend(1)
         isr_code.set_updaters()
+        nvic_pending_register.get_word().update_value(0x0)
+        pending_bit = nvic_pending_register.get_word().get_byte(1).value_txt[0]
+        self.play(Indicate(pending_bit, color=ORANGE,scale_factor=4), run_time=.3)
+
         isr_code.resume()
         self.wait(1)
 
