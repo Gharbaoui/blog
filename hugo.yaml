@@ -8,7 +8,7 @@ params:
     hideCopyright: false
   homeInfoParams:
     Title: "HI"
-    Content: Welcome to my blog! I hope you find the information here useful. By the way, I'm currently looking for an internship. If you have any opportunities, please feel free to reach out.
+    Content: Welcome to my blog! I hope you find the information here useful.
   socialIcons:
     - name: linkedin
       url: "https://linkedin.com/in/mohamed-el-gharbaoui-964022199"
@@ -23,6 +23,13 @@ params:
   ShowBreadCrumbs: true
 
   ShowShareButtons: true
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true  # Enable raw HTML in Markdown files
+    extensions:
+      typographer: true  # Enable typographic enhancements
 
 menu:
   main:
